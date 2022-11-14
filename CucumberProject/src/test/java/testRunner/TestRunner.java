@@ -9,8 +9,8 @@ import io.cucumber.junit.CucumberOptions;
 		features = "./src/test/java/features/outline.feature",
 		glue="stepDefinitions",
 		dryRun=false,
-		plugin= {"pretty","html:target/cucumberResults.html"}
-		//tags="@sanity"
+		plugin= {"pretty","html:target/cucumberResults.html"},
+		tags="@sanity"
 		) 
 
 public class TestRunner {
