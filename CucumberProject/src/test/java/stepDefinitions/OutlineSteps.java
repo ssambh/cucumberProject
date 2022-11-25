@@ -1,12 +1,16 @@
 package stepDefinitions;
 
 import java.time.Duration;
+import java.util.List;
 
 import org.openqa.selenium.By;
+import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.Select;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 
@@ -20,39 +24,37 @@ import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import io.github.bonigarcia.wdm.WebDriverManager;
-import junit.framework.Assert;
+import org.junit.Assert;
 import pageObjects.Dashboard;
 import pageObjects.LoginPage;
+import pageObjects.PersonalizeYourStorePage;
 
 public class OutlineSteps extends BaseMain{
 
 	public static WebDriver driver;
 	public WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
 	
-	LoginPage loginPage;
-	Dashboard dashboard;
+	static LoginPage loginPage;
+	static Dashboard dashboard;
+	static PersonalizeYourStorePage personalizeStore;
 	
 	@Before
 	public static void Setup() {
 		WebDriverManager.chromedriver().setup();
 		driver = new ChromeDriver();
 		driver.manage().window().maximize();
+		dashboard = new Dashboard(driver);
+		loginPage = new LoginPage(driver);
+		personalizeStore = new PersonalizeYourStorePage(driver);
 	}
 	
-	/*
-	 * @Given("User Launch chrome browser") public void openBrowser() {
-	 * WebDriverManager.chromedriver().setup(); driver = new ChromeDriver();
-	 * driver.manage().window().maximize(); }
-	 */
-
-	@When("User opens URL {string}")
+	@Given("User opens URL {string}")
 	public void openLink(String url) {
 	    driver.get(url);
 	    
 	}
-	@And("User input the email as {string} and password as {string}")
+	@When("User inputs the email as {string} and password as {string}")
 	public void inputLoginCredentials(String email, String password) {
-	   loginPage = new LoginPage(driver);
 	    loginPage.emailField.clear();
 	    loginPage.emailField.sendKeys(email);
 	    loginPage.passwordField.clear();
@@ -60,12 +62,10 @@ public class OutlineSteps extends BaseMain{
 	}
 	@And("User clicks on the login button")
 	public void clickLoginBtn() {
-		loginPage = new LoginPage(driver);
 		loginPage.loginButton.click();
 	}
-	@Then("The page title should be {string}")
+	@And("The page title should be {string}")
 	public void validatePageTitle(String title) {
-		loginPage = new LoginPage(driver);
 		Assert.assertEquals(title, driver.getTitle());
 	}
 	
@@ -77,41 +77,41 @@ public class OutlineSteps extends BaseMain{
 		wait.until(ExpectedConditions.visibilityOf(dashboard.productsPageHeading));
 	}
 	
+	@Then("User clicks on the Personalize your store menu item with page title {string}")
+	public void user_clicks_on_the_personalize_your_store_menu_item_with_page_title(String string) {
+		dashboard.startAcceptingYourOrdersCardPlusBtn.click();
+		wait.until(ExpectedConditions.visibilityOf(dashboard.
+		personaliseYourStoreMenuItem));
+		dashboard.personaliseYourStoreMenuItem.click();
+		Assert.assertEquals(string, driver.getTitle());
+		try {
+			if(personalizeStore.configTourPopupNextBtn.isDisplayed()) {
+				personalizeStore.configTourPopupNextBtn.click();
+			}
+		}catch(NoSuchElementException e) {
+			System.out.println("Didn't find the dialogue box this time");
+		}
+	}
+	
+	@When("User click Multi-Store Config dropdown, it should have {string}, {string}, {string} as options")
+	public void user_click_multi_store_config_dropdown_it_should_have_as_options(String string, String string2, String string3) {
+	    Select multiStoreConfig = new Select(personalizeStore.storeConfigDropDown);
+	    List<WebElement> list = multiStoreConfig.getOptions();
+	    for(int i = 0; i < list.size(); i++) {
+	    	if(i==0) {
+	    		Assert.assertEquals(list.get(i).getText(), string);
+	    	}
+	    	if(i==1) {
+	    		Assert.assertEquals(list.get(i).getText(), string2);
+	    	}
+	    	if(i==2) {
+	    		Assert.assertEquals(list.get(i).getText(), string3);
+	    	}
+	    }
+	}
+	
 	@After
 	public static void tearDown() {
 	    driver.quit();
 	}
-	
-	/*
-	 * @And("close the browser") public void closeBrowser() { driver.quit(); }
-	 */
-	
-	
-	/*
-	 * WebDriver driver = null;
-	 * 
-	 * @Given("^I am on Facebook login page$") public void goToFacebook() {
-	 * WebDriverManager.chromedriver().setup(); driver = new ChromeDriver();
-	 * driver.manage().window().maximize();
-	 * driver.navigate().to("https://www.facebook.com/"); }
-	 * 
-	 * @When("^I enter username as \"(.*)\"$") public void enterUsername(String
-	 * arg1) { driver.findElement(By.id("email")).sendKeys(arg1); }
-	 * 
-	 * @When ("^I enter password as \"(.*)\"$") public void enterPassword(String
-	 * arg1) { driver.findElement(By.id("pass")).sendKeys(arg1);
-	 * driver.findElement(By.id("u_0_v")).click(); }
-	 * 
-	 * @Then("^Login should fail$") public void checkFail() {
-	 * if(driver.getCurrentUrl().equalsIgnoreCase(
-	 * "https://www.facebook.com/login.php?login_attempt=1&lwv=110")){
-	 * System.out.println("Test1 Pass"); } else {
-	 * System.out.println("Test1 Failed"); } driver.close(); }
-	 * 
-	 * @Then("^Relogin option should be available$") public void checkRelogin() {
-	 * if(driver.getCurrentUrl().equalsIgnoreCase(
-	 * "https://www.facebook.com/login.php?login_attempt=1&lwv=110")){
-	 * System.out.println("Test2 Pass"); } else {
-	 * System.out.println("Test2 Failed"); } driver.close(); }
-	 */
 }

@@ -22,4 +22,11 @@ public class Dashboard {
 	
 	@FindBy(xpath="//h1[normalize-space(text())='Products']")
 	public WebElement productsPageHeading;
+	
+	// Welcome to your store
+	@FindBy(xpath="//h5[contains(text(),'Personalize your store')]")
+	public WebElement personaliseYourStoreMenuItem;
+	
+	@FindBy(xpath="//*[@class='card-header with-border']//button/i")
+	public WebElement startAcceptingYourOrdersCardPlusBtn;
 }
